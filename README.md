@@ -5,7 +5,7 @@ simple tool to create image masks
 Install from source as follows:
 
 ```bash
-pip install https://github.com/emdb-empiar/masks
+pip install git+https://github.com/emdb-empiar/masks
 ```
 
 ## How to Use
