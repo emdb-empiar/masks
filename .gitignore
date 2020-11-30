@@ -1,0 +1,7 @@
+*.pyc
+__pycache__
+*.mrc
+*.txt
+*.map
+.idea
+masks.egg-info
