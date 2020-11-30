@@ -1,6 +1,15 @@
 # masks
 simple tool to create image masks
 
+## Installation
+Install from source as follows:
+
+```bash
+pip install https://github.com/emdb-empiar/masks
+```
+
+## How to Use
+
 ```
 # view help
 ~$ masks -h
@@ -39,7 +48,7 @@ optional arguments:
 
 ```
 
-Examples
+### Examples
 1. Make a spherical 3D mask with a radius of 50 voxels in a 160^3 volume at the center and output it to an MRC file called `my_mask`
 
 ```
@@ -61,6 +70,7 @@ Examples
 
 
 ## API
+
 There are two main classes: `Mask` and `Mask3D`
 
 ```python
