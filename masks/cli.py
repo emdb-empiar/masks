@@ -3,7 +3,7 @@ import shlex
 import sys
 
 # a global variable
-parser = argparse.ArgumentParser(prog='mask', description='create simple image masks')
+parser = argparse.ArgumentParser(prog='mask', description='simple tool to create image masks')
 # parent_parser
 parent_parser = argparse.ArgumentParser(add_help=False)
 parent_parser.add_argument('-v', '--verbose', default=False, action='store_true',
@@ -14,7 +14,7 @@ subparsers = parser.add_subparsers(dest='command', title='Tools', help='masks ut
 # init
 make_parser = subparsers.add_parser(
     'make',
-    description='make a simple image mask',
+    description='make an image mask',
     help='make mask',
     parents=[parent_parser]
 )
