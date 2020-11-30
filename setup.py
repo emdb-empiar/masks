@@ -1,9 +1,9 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='masks',
     version='0.1.0',
-    packages=[''],
+    packages=find_packages(),
     url='',
     license='Apache Public License',
     author='Paul K. Korir, PhD',
