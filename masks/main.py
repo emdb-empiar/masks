@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 
 import mrcfile
@@ -48,6 +49,9 @@ class Mask:
     def save(self, fn, *args, **kwargs):
         numpy.savetxt(fn, self.mask, fmt='%.4g', *args, **kwargs)
 
+    def apply(self, image):
+        return image * self.mask
+
 
 class Mask3D:
     def __init__(self, image_size=(10, 10, 10), mask_size=(6, 6, 6), mask_pos=(2, 2, 2), visible_value=1.0,
@@ -89,11 +93,12 @@ class Mask3D:
         self.mask[item] = value
 
     def save(self, fn, *args, **kwargs):
-        fn_list = fn.split('.')
-        fn_root, ext = '.'.join(fn_list[:-1]), fn_list[-1]
-        if ext in ['mrc', 'map', 'rec']:
+        if re.match(r".*\.(mrc|map|rec)$", fn, re.IGNORECASE):
             with mrcfile.new(fn, overwrite=True) as f:
                 f.set_data(self.mask.astype(numpy.float32))
+
+    def apply(self, image):
+        return self.mask * image
 
 
 class ArgsMask(Mask):
@@ -138,18 +143,36 @@ def make_mask(args):
     return mask
 
 
+def handle_make(args):
+    mask = make_mask(args)
+    # deal with outputting the mask if needed
+    if args.output:
+        with open(args.output, 'w') as f:
+            mask.save()
+    else:
+        if args.verbose:
+            print(mask)
+    print(f"created {args.mask_size} mask in image {args.image_size} at position {args.mask_pos}", file=sys.stderr)
+    # write images if needed
+    if args.input_image:
+        with mrcfile.open(args.input_image) as inmrc:
+            image = inmrc.data
+            masked = mask.apply(image)
+            with mrcfile.new(args.output_image, overwrite=True) as outmrc:
+                outmrc.set_data(masked.astype(numpy.float32))
+                outmrc.voxel_size = inmrc.voxel_size
+                outmrc.nstart = inmrc.nstart
+        print(
+            f"masked image {args.input_image} as {args.mask_size} mask in image {args.image_size} at position {args.mask_pos} written to {args.output_image}",
+            file=sys.stderr)
+    return os.EX_OK
+
+
 def main():
     args = cli.parse_args()
     exit_status = os.EX_OK
     if args.command == 'make':
-        mask = make_mask(args)
-        if args.output:
-            with open(args.output, 'w') as f:
-                mask.save()
-        else:
-            if args.verbose:
-                print(mask)
-        print(f"created {args.mask_size} mask in image {args.image_size} at position {args.mask_pos}", file=sys.stderr)
+        return handle_make(args)
     return exit_status
 
 

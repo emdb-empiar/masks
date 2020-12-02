@@ -28,6 +28,8 @@ make_parser.add_argument('--invert', default=False, action='store_true', help='i
 make_parser.add_argument('-D', '--dimension', default=2, choices=[2, 3], type=int, help='dimensions [2]')
 make_parser.add_argument('-o', '--output', help='output file [None]')
 make_parser.add_argument('-s', '--shape', default='quad', choices=['quad', 'ellipse'], help="mask shape ['quad']")
+make_parser.add_argument('--input-image', help='input file on which to apply the mask [None]')
+make_parser.add_argument('--output-image', help='output file on which to the mask is applied [None]')
 
 
 def _validate3d(args):
@@ -77,6 +79,11 @@ def parse_args():
             args.mask_size = (args.mask_size[0],) * args.dimension
         if len(args.mask_pos) == 1:
             args.mask_pos = (args.mask_pos[0],) * args.dimension
+        # if --input-image then must have --output-image
+        try:
+            assert (args.input_image and args.output_image) or not (args.input_image or args.output_image) # de morgan's laws
+        except AssertionError:
+            raise ValueError(f"--input-image/--output-image must both be present or both absent")
         # ensure consistency
         try:
             assert len(args.image_size) == len(args.mask_size) == len(args.mask_pos)
