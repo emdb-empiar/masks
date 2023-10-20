@@ -50,6 +50,12 @@ class TestCLI(unittest.TestCase):
         mask = main.make_mask(args)
         self.assertEqual(mask[0, 0], 9.0)
 
+    def test_voxel_size(self):
+        args = cli.cli(f"masks make -I 10 -M 5 -P 1 1 -S 0.5")
+        print(args)
+        mask = main.make_mask(args)
+        self.assertEqual(mask.voxel_size, (0.5, 0.5))
+
     def test_3d(self):
         args = cli.cli(f"masks make -I 10 -M 6 -P 2 -D 3")
         self.assertEqual(args.image_size, (10, 10, 10))

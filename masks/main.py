@@ -9,11 +9,12 @@ from . import cli
 
 
 class Mask:
-    def __init__(self, image_size=(10, 10), mask_size=(6, 6), mask_pos=(2, 2), visible_value=1.0, mask_value=0.0,
+    def __init__(self, image_size=(10, 10), mask_size=(6, 6), mask_pos=(2, 2), voxel_size=(1.0, 1.0), visible_value=1.0, mask_value=0.0,
                  shape='quad'):
         self.width, self.height = image_size
         self.mask_width, self.mask_height = mask_size
         self.pos_width, self.pos_height = mask_pos
+        self.voxel_size = voxel_size
         self.visible_value = visible_value
         self.mask_value = mask_value
         self.shape = shape
@@ -54,11 +55,12 @@ class Mask:
 
 
 class Mask3D:
-    def __init__(self, image_size=(10, 10, 10), mask_size=(6, 6, 6), mask_pos=(2, 2, 2), visible_value=1.0,
+    def __init__(self, image_size=(10, 10, 10), mask_size=(6, 6, 6), mask_pos=(2, 2, 2), voxel_size=(1.0, 1.0, 1.0), visible_value=1.0,
                  mask_value=0.0, shape='quad'):
         self.width, self.height, self.depth = image_size
         self.mask_width, self.mask_height, self.mask_depth = mask_size
         self.pos_width, self.pos_height, self.pos_depth = mask_pos
+        self.voxel_size = voxel_size
         self.visible_value = visible_value
         self.mask_value = mask_value
         self.shape = shape
@@ -76,6 +78,7 @@ class Mask3D:
         elif self.shape == 'ellipse':
             image = numpy.zeros((self.height, self.width, self.depth))
             radius = self.mask_width / 2
+            print(f"{radius=}; {self.height}; {self.width}; {self.depth}")
             for k in range(self.mask_depth):
                 for j in range(self.mask_height):
                     for i in range(self.mask_width):
@@ -96,6 +99,8 @@ class Mask3D:
         if re.match(r".*\.(mrc|map|rec)$", fn, re.IGNORECASE):
             with mrcfile.new(fn, overwrite=True) as f:
                 f.set_data(self.mask.astype(numpy.float32))
+                # fixme: set the voxel size
+                f.voxel_size = self.voxel_size
 
     def apply(self, image):
         return self.mask * image
@@ -107,6 +112,7 @@ class ArgsMask(Mask):
             image_size=args.image_size,
             mask_size=args.mask_size,
             mask_pos=args.mask_pos,
+            voxel_size=args.voxel_size,
             visible_value=args.visible_value,
             mask_value=args.mask_value,
             shape=args.shape,
@@ -124,6 +130,7 @@ class ArgsMask3D(Mask3D):
             image_size=args.image_size,
             mask_size=args.mask_size,
             mask_pos=args.mask_pos,
+            voxel_size=args.voxel_size,
             visible_value=args.visible_value,
             mask_value=args.mask_value,
             shape=args.shape,
@@ -152,7 +159,11 @@ def handle_make(args):
     else:
         if args.verbose:
             print(mask)
-    print(f"created {args.mask_size} mask in image {args.image_size} at position {args.mask_pos}", file=sys.stderr)
+    print(
+        f"created {args.mask_size} mask in image {args.image_size} at "
+        f"position {args.mask_pos} with voxel size {args.voxel_size}",
+        file=sys.stderr
+    )
     # write images if needed
     if args.input_image:
         with mrcfile.open(args.input_image) as inmrc:

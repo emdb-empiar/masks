@@ -21,6 +21,7 @@ make_parser = subparsers.add_parser(
 make_parser.add_argument('-I', '--image-size', nargs='+', default=(10,), type=int, help='image size [10,10]')
 make_parser.add_argument('-M', '--mask-size', nargs='+', default=(6,), type=int, help='mask size [6,6]')
 make_parser.add_argument('-P', '--mask-pos', nargs='+', default=(2,), type=int, help='mask position [2,2]')
+make_parser.add_argument('-S', '--voxel-size', nargs='+', default=(1.0,), type=float, help='voxel size [1.0,1.0]')
 make_parser.add_argument('-V', '--visible-value', default=1.0, type=float, help='visible value [1.0]')
 make_parser.add_argument('-X', '--mask-value', default=0.0, type=float, help='mask value [0.0]')
 # make_parser
@@ -79,6 +80,8 @@ def parse_args():
             args.mask_size = (args.mask_size[0],) * args.dimension
         if len(args.mask_pos) == 1:
             args.mask_pos = (args.mask_pos[0],) * args.dimension
+        if len(args.voxel_size) == 1:
+            args.voxel_size = (args.voxel_size[0],) * args.dimension
         # if --input-image then must have --output-image
         try:
             assert (args.input_image and args.output_image) or not (args.input_image or args.output_image) # de morgan's laws
